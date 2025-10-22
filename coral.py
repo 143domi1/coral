@@ -1,9 +1,11 @@
 import os
 import json
-import requests
 import bcrypt
+import asyncio
+import httpx
 
-database_auth_url = "https://shineflixtv.netlify.app/user_database.json" #ignore this im gonna fill it later
+version = "0.0.1"
+database_auth_url = "https://shineflixtv.netlify.app/user_database.json" 
 response_auth = requests.get(database_auth_url)
 data_auth = response_auth.json()
 corals_data = os.path.expanduser("~/.config/coral/")
@@ -12,6 +14,16 @@ coral_user_auth_local_data = os.path.join(corals_data, "user.json")
 
 settings = os.path.join(os.path.expanduser(corals_data), "settings.json")
 
+aync def download(url, filename):
+	script_dir = os.path.dirname(os.path.abspath(__file__))
+	filepath = os.path.join(script_dir, filename)
+	async with httpx.AsyncClient(https2=True, verify=True) as client:
+		response = await client.get(url)
+		response.raise_for_status()
+		with open(filepath, "wb") as f:
+			f.write(response.content)
+		print("Download complete!")
+	
 def login():
 	print("Please login to coral")
 	username = input("Username: ")
@@ -65,6 +77,7 @@ else:
 	login()
 
 
+
 def update_channel():
 	print("What release channel do you want to use? (This can be changed later): \nSTABLE - This is the stable version of the Coral client (Updated every month)\nBETA - This is the beta version of the Coral client (This is a little bit less stable than the STABLE version, it is updated every week)\nALPHA - This version is NOT stable or beta software, this is THE ALPHA version, this version is basicly every push to the repo on Github.\n")
 	answer = input().upper()
@@ -82,13 +95,21 @@ def update_channel():
 	elif answer == "ALPHA":
 		update_channel_data = {
 			"release_channel": "ALPHA",
-			"url": ""
+			"url": "https://raw.githubusercontent.com/143domi1/coral/refs/heads/main/coral.py"
 
 		}
 	else:
 		print("Invalid option, please choose STABLE or BETA or ALPHA.")
 		update_channel()
-	with open(settings, "w", encoding="utf-8") as user:
-		json.dump(update_channel_data, user, ensure_ascii=False, indent=4)
+	with open(settings, "w", encoding="utf-8") as settings:
+		json.dump(update_channel_data, settings, ensure_ascii=False, indent=4)
 
 
+def update_coral():
+	print(f"Current version: {version}")
+	with open(settings, "r") as settings:
+		setting = json.load(settings)
+	asyncio.run(setting["url"], "coral.py")
+	
+
+update_channel()
