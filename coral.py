@@ -18,7 +18,7 @@ settings = os.path.join(os.path.expanduser(corals_data), "settings.json")
 async def download(url, filename):
 	script_dir = os.path.dirname(os.path.abspath(__file__))
 	filepath = os.path.join(script_dir, filename)
-	async with httpx.AsyncClient(https2=True, verify=True) as client:
+	async with httpx.AsyncClient(http2=True, verify=True) as client:
 		response = await client.get(url)
 		response.raise_for_status()
 		with open(filepath, "wb") as f:
@@ -91,26 +91,26 @@ def update_channel():
 		update_channel_data = {
 			"release_channel" : "BETA",
 			"url": ""
-
-	}
+		}
 	elif answer == "ALPHA":
 		update_channel_data = {
 			"release_channel": "ALPHA",
 			"url": "https://raw.githubusercontent.com/143domi1/coral/refs/heads/main/coral.py"
-
 		}
 	else:
 		print("Invalid option, please choose STABLE or BETA or ALPHA.")
 		update_channel()
-	with open(settings, "w", encoding="utf-8") as settings:
-		json.dump(update_channel_data, settings, ensure_ascii=False, indent=4)
+	with open(settings, "w", encoding="utf-8") as settings_file:
+		json.dump(update_channel_data, settings_file, ensure_ascii=False, indent=4)
 
 
 def update_coral():
 	print(f"Current version: {version}")
 	with open(settings, "r") as settings:
 		setting = json.load(settings)
-	asyncio.run(setting["url"], "coral.py")
+	asyncio.run(download(setting["url"], "coral.py"))
 	
+if not os.path.exists(settings):
+	update_channel()
 
 update_channel()
