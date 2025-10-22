@@ -3,6 +3,7 @@ import json
 import bcrypt
 import asyncio
 import httpx
+import requests
 
 version = "0.0.1"
 database_auth_url = "https://shineflixtv.netlify.app/user_database.json" 
