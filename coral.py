@@ -14,7 +14,7 @@ coral_user_auth_local_data = os.path.join(corals_data, "user.json")
 
 settings = os.path.join(os.path.expanduser(corals_data), "settings.json")
 
-aync def download(url, filename):
+async def download(url, filename):
 	script_dir = os.path.dirname(os.path.abspath(__file__))
 	filepath = os.path.join(script_dir, filename)
 	async with httpx.AsyncClient(https2=True, verify=True) as client:
