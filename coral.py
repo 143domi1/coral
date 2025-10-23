@@ -18,6 +18,7 @@ corals_logs = os.path.join(corals_data, "coral_logs.json")
 settings = os.path.join(os.path.expanduser(corals_data), "settings.json")
 now = datetime.now()
 current_time = now.strftime("%d-%m-%Y %H:%M:%S")
+
 def write_log(message):
     if os.path.exists(corals_logs):
         with open(corals_logs, "r", encoding="utf-8") as f:
@@ -77,29 +78,30 @@ else:
 
 with open(coral_user_auth_local_data, "r", encoding="utf-8") as f:
     userdata = json.load(f)
-    
+has_token_be_checked = False
+def check_token():
+    username_local = userdata.get("username")
+    session_token_local = userdata.get("session_token")
+    if username_local and session_token_local:
+        if username_local in data_auth["users"]:
+            session_token_online = data_auth["users"][username_local]["session_token"]
 
-username_local = userdata.get("username")
-session_token_local = userdata.get("session_token")
-if username_local and session_token_local:
-    if username_local in data_auth["users"]:
-        session_token_online = data_auth["users"][username_local]["session_token"]
-
-        if session_token_local == session_token_online:
-            print("Success, session token is valid")
-            write_log("Session token is valid!")
+            if session_token_local == session_token_online:
+                print("Success, session token is valid")
+                write_log("Session token is valid!")
+                has_token_be_checked = True
+            else:
+                print("Failure, session token isn't valid")
+                write_log("Failed to authenticate session token!")
+                login()
         else:
-            print("Failure, session token isn't valid")
-            write_log("Failed to authenticate session token!")
+            print("Username not found in online database, re-authenticate.")
+            write_log("Username not found in online database, re-authenticate")
             login()
     else:
-        print("Username not found in online database, re-authenticate.")
-        write_log("Username not found in online database, re-authenticate")
+        print("No valid local session was found.")
+        write_log("No valid local session was found.")
         login()
-else:
-    print("No valid local session was found.")
-    write_log("No valid local session was found.")
-    login()
 
 
 
@@ -142,4 +144,11 @@ def update_coral():
     
 if not os.path.exists(settings):
     update_channel()
-update_channel()
+
+def main():
+    if has_token_be_checked == False:
+        check_token()
+    elif has_token_be_checked == True:
+        pass
+    
+main()
